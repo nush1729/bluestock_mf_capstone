@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Bluestock Mutual Fund Analytics motion banner</title>
+  <desc id="desc">An animated financial analytics banner with flowing lines, signal bars, and dashboard-style metrics.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#07111f"/>
+      <stop offset="48%" stop-color="#0d2633"/>
+      <stop offset="100%" stop-color="#132018"/>
+    </linearGradient>
+    <linearGradient id="line" x1="0" x2="1">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="45%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="320" rx="22" fill="url(#bg)"/>
+  <g opacity="0.16" stroke="#cbd5e1" stroke-width="1">
+    <path d="M70 60H1130M70 120H1130M70 180H1130M70 240H1130"/>
+    <path d="M160 40V280M300 40V280M440 40V280M580 40V280M720 40V280M860 40V280M1000 40V280"/>
+  </g>
+
+  <g filter="url(#softGlow)">
+    <path d="M88 238 C168 210 196 226 254 178 S364 126 436 151 S554 206 622 143 S736 70 824 105 S942 174 1110 78"
+          fill="none" stroke="url(#line)" stroke-width="6" stroke-linecap="round" stroke-dasharray="1260" stroke-dashoffset="1260">
+      <animate attributeName="stroke-dashoffset" from="1260" to="0" dur="2.8s" begin="0s" fill="freeze"/>
+    </path>
+    <path d="M88 260 C188 248 260 270 340 230 S484 191 570 211 S710 264 798 214 S930 134 1110 158"
+          fill="none" stroke="#93c5fd" stroke-width="3" opacity="0.55" stroke-linecap="round" stroke-dasharray="1180" stroke-dashoffset="1180">
+      <animate attributeName="stroke-dashoffset" from="1180" to="0" dur="3.4s" begin="0.25s" fill="freeze"/>
+    </path>
+  </g>
+
+  <g transform="translate(78 68)">
+    <text x="0" y="0" fill="#f8fafc" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="44" font-weight="800">Bluestock Mutual Fund Analytics</text>
+    <text x="0" y="42" fill="#bae6fd" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="600">ETL warehouse, risk engine, ML notebooks, and Streamlit decision cockpit</text>
+  </g>
+
+  <g transform="translate(78 198)" font-family="Inter, Segoe UI, Arial, sans-serif">
+    <g>
+      <rect width="164" height="58" rx="12" fill="#0f172a" opacity="0.72" stroke="#22c55e" stroke-opacity="0.42"/>
+      <text x="18" y="24" fill="#94a3b8" font-size="13" font-weight="700">FUNDS TRACKED</text>
+      <text x="18" y="46" fill="#f8fafc" font-size="24" font-weight="800">40</text>
+    </g>
+    <g transform="translate(184 0)">
+      <rect width="164" height="58" rx="12" fill="#0f172a" opacity="0.72" stroke="#38bdf8" stroke-opacity="0.42"/>
+      <text x="18" y="24" fill="#94a3b8" font-size="13" font-weight="700">NAV RECORDS</text>
+      <text x="18" y="46" fill="#f8fafc" font-size="24" font-weight="800">46K</text>
+    </g>
+    <g transform="translate(368 0)">
+      <rect width="164" height="58" rx="12" fill="#0f172a" opacity="0.72" stroke="#f59e0b" stroke-opacity="0.42"/>
+      <text x="18" y="24" fill="#94a3b8" font-size="13" font-weight="700">AUM SNAPSHOT</text>
+      <text x="18" y="46" fill="#f8fafc" font-size="24" font-weight="800">62.74L Cr</text>
+    </g>
+  </g>
+
+  <g transform="translate(900 198)" fill="#38bdf8">
+    <rect x="0" y="31" width="22" height="40" rx="4">
+      <animate attributeName="height" values="40;64;40" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="31;7;31" dur="1.8s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="38" y="18" width="22" height="53" rx="4" fill="#34d399">
+      <animate attributeName="height" values="53;31;53" dur="2.1s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="18;40;18" dur="2.1s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="76" y="4" width="22" height="67" rx="4" fill="#f59e0b">
+      <animate attributeName="height" values="67;45;67" dur="1.7s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="4;26;4" dur="1.7s" repeatCount="indefinite"/>
+    </rect>
+    <rect x="114" y="25" width="22" height="46" rx="4" fill="#93c5fd">
+      <animate attributeName="height" values="46;70;46" dur="2s" repeatCount="indefinite"/>
+      <animate attributeName="y" values="25;1;25" dur="2s" repeatCount="indefinite"/>
+    </rect>
+  </g>
+</svg>

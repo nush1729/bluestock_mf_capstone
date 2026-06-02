@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bluestock - Mutual Fund Intelligence Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #38bdf8;
+            --secondary: #0f172a;
+            --accent: #06b6d4;
+            --dark-bg: #0b0f19;
+            --card-bg: rgba(17, 24, 39, 0.7);
+            --text-light: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0b0f19 0%, #0f172a 100%);
+            color: var(--text-light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ===== NAVBAR ===== */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            backdrop-filter: blur(12px);
+            background: rgba(11, 15, 25, 0.8);
+            border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+            padding: 1.5rem 2rem;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-logo i {
+            font-size: 1.8rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--secondary);
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            padding: 8rem 2rem 2rem;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            text-align: center;
+            animation: fadeInUp 1s ease;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 50%, #0ea5e9 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .animated-text {
+            position: relative;
+            height: 3.5rem;
+            margin: 2rem 0;
+        }
+
+        .word {
+            position: absolute;
+            opacity: 0;
+            animation: slideIn 1s ease forwards;
+            font-size: 1.5rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .word:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .word:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        .word:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: var(--secondary);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(56, 189, 248, 0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(56, 189, 248, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            padding: 1rem 2.5rem;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(56, 189, 248, 0.1);
+            transform: translateY(-4px);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== FEATURES SECTION ===== */
+        .features {
+            position: relative;
+            z-index: 3;
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(56, 189, 248, 0.1);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(56, 189, 248, 0.3);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.1);
+        }
+
+        .feature-card:hover::before {
+            left: 100%;
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            background: rgba(11, 15, 25, 0.9);
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            padding: 3rem 2rem 1rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .social-links a:hover {
+            background: var(--primary);
+            color: var(--secondary);
+            transform: translateY(-4px);
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--primary), var(--accent));
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--accent), var(--primary));
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.5rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding: 6rem 1rem 2rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-cube"></i>
+                Bluestock
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="nav-btn" onclick="window.location.href='#dashboard'">Launch Dashboard</button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div id="canvas-container"></div>
+        <div class="hero-content">
+            <h1>Intelligent Mutual Fund Analytics</h1>
+            <div class="animated-text">
+                <span class="word">Real-time Intelligence</span>
+                <span class="word">Smart Insights</span>
+                <span class="word">Data-Driven Decisions</span>
+            </div>
+            <p>Transform fragmented mutual fund data into actionable intelligence. Harness AI-powered analytics for smarter investment decisions.</p>
+            <div class="cta-buttons">
+                <button class="btn-primary" onclick="window.location.href='./streamlit_app.py'">
+                    <i class="fas fa-rocket"></i> Explore Dashboard
+                </button>
+                <button class="btn-secondary" onclick="alert('Learn more coming soon!')">
+                    <i class="fas fa-book"></i> Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES SECTION -->
+    <section class="features" id="features">
+        <h2 class="section-title">Powerful Features</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Performance Analytics</h3>
+                <p>Advanced metrics including CAGR, Sharpe Ratio, Sortino Ratio, Alpha, Beta, and Maximum Drawdown for comprehensive fund evaluation.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-database"></i></div>
+                <h3>Data Warehouse</h3>
+                <p>Star Schema architecture enabling fast, complex analytical queries across 10 synchronized dimensions covering Indian mutual funds.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-cogs"></i></div>
+                <h3>Automated ETL</h3>
+                <p>End-to-end extraction, validation, and transformation pipeline with intelligent handling of market holidays and weekend data.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>ML Clustering</h3>
+                <p>K-Means clustering and advanced segmentation to identify fund patterns, correlations, and behavioral groups automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-lightbulb"></i></div>
+                <h3>Recommendations</h3>
+                <p>Intelligent recommendation engine leveraging portfolio optimization and Monte Carlo simulations for personalized fund suggestions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fas fa-bolt"></i></div>
+                <h3>Live Data Sync</h3>
+                <p>Real-time NAV fetching from mfapi.in integration ensuring your analytics always reflect the latest market movements.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4><i class="fas fa-cube"></i> Bluestock</h4>
+                <p>Comprehensive mutual fund analytics platform built on enterprise-grade data engineering and advanced analytics.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="README.md">Documentation</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#blog">Blog</a></li>
+                    <li><a href="#help">Help Center</a></li>
+                    <li><a href="#privacy">Privacy Policy</a></li>
+                    <li><a href="#terms">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Follow Us</h4>
+                <div class="social-links">
+                    <a href="#twitter" title="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#linkedin" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                    <a href="#github" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#mail" title="Email"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Bluestock. All rights reserved.</p>
+            <p>Crafted with <i class="fas fa-heart" style="color: #ef4444;"></i> for financial innovation</p>
+        </div>
+    </footer>
+
+    <!-- THREE.JS FOR 3D EFFECTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Initialize 3D Canvas
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+
+        // Create floating cubes
+        const cubes = [];
+        const material = new THREE.MeshPhongMaterial({
+            color: 0x38bdf8,
+            emissive: 0x06b6d4,
+            wireframe: false
+        });
+
+        for (let i = 0; i < 8; i++) {
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const cube = new THREE.Mesh(geometry, material);
+            cube.position.set(
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 15,
+                (Math.random() - 0.5) * 15
+            );
+            cube.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+            cube.userData.vx = (Math.random() - 0.5) * 0.02;
+            cube.userData.vy = (Math.random() - 0.5) * 0.02;
+            cube.userData.vz = (Math.random() - 0.5) * 0.02;
+            scene.add(cube);
+            cubes.push(cube);
+        }
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0x38bdf8, 1);
+        pointLight.position.set(10, 10, 10);
+        scene.add(pointLight);
+
+        const pointLight2 = new THREE.PointLight(0x06b6d4, 0.5);
+        pointLight2.position.set(-10, -10, 10);
+        scene.add(pointLight2);
+
+        camera.position.z = 8;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            cubes.forEach(cube => {
+                cube.rotation.x += cube.userData.vx;
+                cube.rotation.y += cube.userData.vy;
+                cube.rotation.z += cube.userData.vz;
+
+                cube.position.x += cube.userData.vx * 0.5;
+                cube.position.y += cube.userData.vy * 0.5;
+                cube.position.z += cube.userData.vz * 0.5;
+
+                // Bounce off boundaries
+                if (Math.abs(cube.position.x) > 8) cube.userData.vx *= -1;
+                if (Math.abs(cube.position.y) > 8) cube.userData.vy *= -1;
+                if (Math.abs(cube.position.z) > 8) cube.userData.vz *= -1;
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Animated text rotation
+        const words = document.querySelectorAll('.word');
+        let currentWord = 0;
+
+        setInterval(() => {
+            words.forEach(word => {
+                word.style.opacity = '0';
+                word.style.transform = 'translateY(30px)';
+            });
+
+            setTimeout(() => {
+                words[currentWord].style.animation = 'slideIn 1s ease forwards';
+                currentWord = (currentWord + 1) % words.length;
+            }, 300);
+        }, 4000);
+    </script>
+</body>
+</html>

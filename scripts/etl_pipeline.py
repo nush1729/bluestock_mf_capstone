@@ -16,6 +16,7 @@ Author: Bluestock Fintech Analytics Team
 
 import logging
 import sys
+import sqlite3
 from pathlib import Path
 from datetime import datetime
 
@@ -27,7 +28,8 @@ from sqlalchemy import create_engine, text
 # Configuration
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RAW_DATA_DIR = PROJECT_ROOT / "datasets"
+RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
+LEGACY_DATA_DIR = PROJECT_ROOT / "datasets"
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 DB_DIR = PROJECT_ROOT / "data" / "db"
 SQL_DIR = PROJECT_ROOT / "sql"
@@ -108,11 +110,15 @@ def extract_all() -> dict:
     logger.info("PHASE 1: EXTRACT — Reading raw CSV files")
     logger.info("=" * 60)
 
-    csv_files = sorted(RAW_DATA_DIR.glob("*.csv"))
+    source_dir = RAW_DATA_DIR
+    csv_files = sorted(source_dir.glob("[0-9][0-9]_*.csv"))
+    if not csv_files and LEGACY_DATA_DIR.exists():
+        source_dir = LEGACY_DATA_DIR
+        csv_files = sorted(source_dir.glob("[0-9][0-9]_*.csv"))
     if len(csv_files) == 0:
-        raise FileNotFoundError(f"No CSV files found in {RAW_DATA_DIR}")
+        raise FileNotFoundError(f"No source CSV files found in {RAW_DATA_DIR} or {LEGACY_DATA_DIR}")
 
-    logger.info(f"Found {len(csv_files)} CSV files in {RAW_DATA_DIR}")
+    logger.info(f"Found {len(csv_files)} source CSV files in {source_dir}")
 
     datasets = {}
     for fp in csv_files:
@@ -148,15 +154,23 @@ def transform_nav_history(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
     df["amfi_code"] = df["amfi_code"].astype(int)
+    df["nav"] = pd.to_numeric(df["nav"], errors="coerce")
+    bad_dates = df["date"].isna().sum()
+    bad_nav = (df["nav"].isna() | (df["nav"] <= 0)).sum()
+    if bad_dates or bad_nav:
+        logger.warning(f"  Dropping invalid NAV rows: bad_dates={bad_dates}, bad_nav={bad_nav}")
+    df = df.dropna(subset=["date", "nav"])
+    df = df[df["nav"] > 0]
+    dupes = df.duplicated(subset=["amfi_code", "date"]).sum()
+    if dupes:
+        logger.warning(f"  Removing {dupes} duplicate NAV rows by amfi_code/date")
+    df = df.drop_duplicates(subset=["amfi_code", "date"], keep="last")
     df = df.sort_values(["amfi_code", "date"]).reset_index(drop=True)
 
-    # Compute daily returns per fund
-    df["daily_return_pct"] = df.groupby("amfi_code")["nav"].pct_change() * 100
-
-    # Forward-fill any gaps in NAV for each fund (weekends/holidays)
+    # Forward-fill daily gaps so weekends and market holidays have the prior NAV.
     full_frames = []
-    all_dates = pd.bdate_range(df["date"].min(), df["date"].max())
     for code, grp in df.groupby("amfi_code"):
+        all_dates = pd.date_range(grp["date"].min(), grp["date"].max(), freq="D")
         grp = grp.set_index("date").reindex(all_dates)
         grp["amfi_code"] = code
         grp["nav"] = grp["nav"].ffill()
@@ -209,6 +223,17 @@ def transform_scheme_performance(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("  Transforming: scheme_performance")
     df = df.copy()
     df["amfi_code"] = df["amfi_code"].astype(int)
+    numeric_cols = [
+        "return_1yr_pct", "return_3yr_pct", "return_5yr_pct", "benchmark_3yr_pct",
+        "alpha", "beta", "sharpe_ratio", "sortino_ratio", "std_dev_ann_pct",
+        "max_drawdown_pct", "aum_crore", "expense_ratio_pct", "morningstar_rating",
+    ]
+    for col in numeric_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+    anomalies = df[df["expense_ratio_pct"].notna() & ~df["expense_ratio_pct"].between(0.1, 2.5)]
+    if not anomalies.empty:
+        logger.warning(f"  Expense ratio outside 0.1%-2.5%: {len(anomalies)} rows")
     return df
 
 
@@ -218,6 +243,28 @@ def transform_transactions(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["transaction_date"] = pd.to_datetime(df["transaction_date"], errors="coerce")
     df["amfi_code"] = df["amfi_code"].astype(int)
+    df["amount_inr"] = pd.to_numeric(df["amount_inr"], errors="coerce")
+    type_map = {
+        "sip": "SIP",
+        "systematic investment plan": "SIP",
+        "lumpsum": "Lumpsum",
+        "lump sum": "Lumpsum",
+        "redemption": "Redemption",
+        "redeem": "Redemption",
+    }
+    df["transaction_type"] = (
+        df["transaction_type"].astype(str).str.strip().str.lower().map(type_map).fillna(df["transaction_type"])
+    )
+    invalid_dates = df["transaction_date"].isna().sum()
+    invalid_amounts = (df["amount_inr"].isna() | (df["amount_inr"] <= 0)).sum()
+    if invalid_dates or invalid_amounts:
+        logger.warning(f"  Dropping invalid transaction rows: bad_dates={invalid_dates}, bad_amounts={invalid_amounts}")
+    valid_kyc = {"Verified", "Pending", "Rejected"}
+    invalid_kyc = sorted(set(df["kyc_status"].dropna()) - valid_kyc)
+    if invalid_kyc:
+        logger.warning(f"  Unexpected KYC statuses found: {invalid_kyc}")
+    df = df.dropna(subset=["transaction_date", "amount_inr"])
+    df = df[df["amount_inr"] > 0]
     return df
 
 
@@ -312,20 +359,13 @@ def load_sqlite(cleaned: dict):
 
     engine = create_engine(f"sqlite:///{DB_PATH}", echo=False)
 
-    # Execute schema SQL
+    # Execute schema SQL before appending data so declared keys/constraints remain.
     schema_file = SQL_DIR / "schema.sql"
     if schema_file.exists():
-        with engine.connect() as conn:
-            schema_sql = schema_file.read_text()
-            # Split by semicolons and execute each statement
-            for stmt in schema_sql.split(";"):
-                stmt = stmt.strip()
-                if stmt and not stmt.startswith("--"):
-                    try:
-                        conn.execute(text(stmt))
-                    except Exception as e:
-                        logger.warning(f"  Schema statement warning: {e}")
-            conn.commit()
+        raw_conn = sqlite3.connect(DB_PATH)
+        raw_conn.executescript(schema_file.read_text())
+        raw_conn.commit()
+        raw_conn.close()
         logger.info("  Schema created from schema.sql")
     else:
         logger.warning("  schema.sql not found — tables will be created by pandas")
@@ -369,7 +409,7 @@ def load_sqlite(cleaned: dict):
             df = df[[c for c in cols_to_keep if c in df.columns]]
 
         try:
-            df.to_sql(table_name, engine, if_exists="replace", index=False)
+            df.to_sql(table_name, engine, if_exists="append", index=False)
             logger.info(f"  Loaded: {table_name} ({len(df)} rows)")
         except Exception as e:
             logger.error(f"  Failed to load {table_name}: {e}")

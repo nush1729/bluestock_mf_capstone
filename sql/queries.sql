@@ -4,7 +4,7 @@
 -- ============================================================
 
 -- ============================================================
--- QUERY 1: Top 10 Funds by AUM (Assets Under Management)
+-- QUERY 1: Top 5 Funds by AUM (Assets Under Management)
 -- ============================================================
 SELECT
     f.amfi_code,
@@ -17,7 +17,7 @@ SELECT
 FROM dim_fund f
 JOIN fact_performance p ON f.amfi_code = p.amfi_code
 ORDER BY p.aum_crore DESC
-LIMIT 10;
+LIMIT 5;
 
 -- ============================================================
 -- QUERY 2: Average Monthly NAV per Fund (Latest Year)

@@ -121,6 +121,7 @@ def load_data():
         portfolio = pd.read_sql("SELECT * FROM fact_portfolio", conn)
         nav_history = pd.read_sql("SELECT * FROM fact_nav", conn)
         benchmark = pd.read_sql("SELECT * FROM fact_benchmark", conn)
+        folios = pd.read_sql("SELECT * FROM fact_folio_count", conn)
         
         # Merge dim_fund and fact_performance safely on amfi_code only, avoiding duplicates
         # Overlapping columns to drop from performance before merge:
@@ -140,7 +141,8 @@ def load_data():
             "transactions": transactions,
             "portfolio": portfolio,
             "nav_history": nav_history,
-            "benchmark": benchmark
+            "benchmark": benchmark,
+            "folios": folios
         }
     except Exception as e:
         st.error(f"Error loading data: {e}")
@@ -166,6 +168,7 @@ page = st.sidebar.radio(
     [
         "� Home",
         "🏛 Executive Summary", 
+        "🔎 EDA Analysis",
         "🏆 Fund Performance", 
         "🛡 Risk Analytics", 
         "🎯 Recommendation Center",
@@ -307,9 +310,9 @@ if "Home" in page:
     with nav_col3:
         st.markdown("""
         <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🛡 Risk Analytics</h3>
+            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🔎 EDA Analysis</h3>
             <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Comprehensive risk assessment: volatility, drawdowns, Value at Risk (VaR), Sharpe ratios, and correlation matrices for portfolio analysis.
+                Day 3 exploratory analysis covering NAV trends, AUM concentration, SIP momentum, category flows, demographics, geography, and sector exposure.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -339,9 +342,9 @@ if "Home" in page:
     with nav_col6:
         st.markdown("""
         <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🎲 Simulations</h3>
+            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🛡 Risk Analytics</h3>
             <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Monte Carlo projections, scenario analysis, efficient frontier optimization, and advanced financial modeling for sophisticated analysis.
+                Volatility, drawdowns, Value at Risk (VaR), Sharpe ratios, and correlation matrices for portfolio analysis.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -534,10 +537,10 @@ elif "Executive Summary" in page:
 
     # --- NEW: Folio Count Trend ---
     st.subheader("📊 Industry Folio Count Growth")
-    sip_trend = data["sip"].copy()
-    if "total_folios_crore" in sip_trend.columns:
+    folio_trend = data["folios"].copy()
+    if "total_folios_crore" in folio_trend.columns:
         fig_folio = px.area(
-            sip_trend.sort_values("month"),
+            folio_trend.sort_values("month"),
             x="month",
             y="total_folios_crore",
             title="Total Industry Folios Over Time (Crore)",
@@ -547,7 +550,215 @@ elif "Executive Summary" in page:
         st.plotly_chart(fig_folio, use_container_width=True)
 
 # ---------------------------------------------------------------------------
-# Page 2: Fund Performance
+# Page 2: EDA Analysis
+# ---------------------------------------------------------------------------
+elif "EDA Analysis" in page:
+    st.title("🔎 Day 3 Exploratory Data Analysis")
+    st.markdown("Interactive frontend companion for `notebooks/EDA_Analysis.ipynb` with the completed Day 3 chart set and report exports.")
+
+    chart_dir = Path(__file__).resolve().parent / "outputs" / "eda_charts"
+    notebook_path = Path(__file__).resolve().parent / "notebooks" / "EDA_Analysis.ipynb"
+    exported_charts = sorted(chart_dir.glob("*.png")) if chart_dir.exists() else []
+
+    nav_df = data["nav_history"].merge(
+        data["funds"][["amfi_code", "scheme_name", "fund_house", "category", "sub_category"]],
+        on="amfi_code",
+        how="left"
+    )
+    nav_df["date"] = pd.to_datetime(nav_df["date"], errors="coerce")
+    sip_df = data["sip"].copy()
+    sip_df["month_dt"] = pd.to_datetime(sip_df["month"], errors="coerce")
+    aum_df = data["aum"].copy()
+    aum_df["date"] = pd.to_datetime(aum_df["date"], errors="coerce")
+    cat_df = data["cat_inflows"].copy()
+    cat_df["month_dt"] = pd.to_datetime(cat_df["month"], errors="coerce")
+    tx_df = data["transactions"].copy()
+    folio_df = data["folios"].copy()
+    folio_df["month_dt"] = pd.to_datetime(folio_df["month"], errors="coerce")
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Schemes in NAV EDA", f"{nav_df['scheme_name'].nunique():,}")
+    with col2:
+        st.metric("Notebook Charts Exported", f"{len(exported_charts):,}")
+    with col3:
+        st.metric("SIP High", f"₹{sip_df['sip_inflow_crore'].max():,.0f} Cr")
+    with col4:
+        st.metric("Latest Folios", f"{folio_df.sort_values('month_dt').iloc[-1]['total_folios_crore']:.2f} Cr")
+
+    st.markdown(
+        f"""
+        <div class="glass-card" style="margin: 10px 0 20px 0;">
+            <div class="card-title">EDA Deliverables</div>
+            <p style="color: #94a3b8; margin: 0;">
+                Notebook: <code>{notebook_path.relative_to(Path(__file__).resolve().parent)}</code><br>
+                PNG exports: <code>{chart_dir.relative_to(Path(__file__).resolve().parent)}</code>
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    tab_nav, tab_flows, tab_investors, tab_risk, tab_exports = st.tabs([
+        "NAV & AUM",
+        "SIP & Categories",
+        "Investors & Geography",
+        "Correlation & Sectors",
+        "Exports"
+    ])
+
+    with tab_nav:
+        st.subheader("Daily NAV Trend for All 40 Schemes")
+        fig_nav = px.line(
+            nav_df.sort_values("date"),
+            x="date",
+            y="nav",
+            color="scheme_name",
+            labels={"nav": "NAV", "date": "Date", "scheme_name": "Scheme"},
+            title="NAV Trend Analysis with 2023 Bull Run and 2024 Corrections"
+        )
+        fig_nav.add_vrect(x0="2023-01-01", x1="2023-12-31", fillcolor="#22c55e", opacity=0.10, line_width=0, annotation_text="2023 bull run")
+        fig_nav.add_vrect(x0="2024-06-01", x1="2024-10-31", fillcolor="#ef4444", opacity=0.10, line_width=0, annotation_text="2024 corrections")
+        fig_nav.update_layout(template="plotly_dark", height=560, legend=dict(font=dict(size=8)), plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_nav, use_container_width=True)
+
+        st.subheader("AUM Growth by Fund House")
+        aum_year = aum_df[aum_df["date"].dt.year.between(2022, 2025)].copy()
+        aum_year["year"] = aum_year["date"].dt.year.astype(str)
+        latest_year_aum = aum_year.sort_values("date").groupby(["year", "fund_house"], as_index=False).tail(1)
+        fig_aum = px.bar(
+            latest_year_aum,
+            x="fund_house",
+            y="aum_lakh_crore",
+            color="year",
+            barmode="group",
+            title="Grouped AUM by Fund House, 2022-2025",
+            labels={"aum_lakh_crore": "AUM (lakh crore)", "fund_house": "Fund house"}
+        )
+        fig_aum.add_hline(y=12.5, line_dash="dash", line_color="#ef4444", annotation_text="SBI dominance: ₹12.5L Cr")
+        fig_aum.update_layout(template="plotly_dark", xaxis_tickangle=-30, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_aum, use_container_width=True)
+
+    with tab_flows:
+        st.subheader("Monthly SIP Inflow Trend")
+        max_sip = sip_df.loc[sip_df["sip_inflow_crore"].idxmax()]
+        fig_sip = px.line(
+            sip_df.sort_values("month_dt"),
+            x="month_dt",
+            y="sip_inflow_crore",
+            markers=True,
+            title="SIP Inflows, Jan 2022-Dec 2025",
+            labels={"month_dt": "Month", "sip_inflow_crore": "SIP inflow (₹ crore)"}
+        )
+        fig_sip.add_annotation(x=max_sip["month_dt"], y=max_sip["sip_inflow_crore"], text=f"All-time high: ₹{max_sip['sip_inflow_crore']:,.0f} Cr", showarrow=True, arrowhead=2)
+        fig_sip.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_sip, use_container_width=True)
+
+        st.subheader("Category Inflow Heatmap")
+        heat = cat_df.pivot_table(
+            index="category",
+            columns=cat_df["month_dt"].dt.strftime("%Y-%m"),
+            values="net_inflow_crore",
+            aggfunc="sum",
+            fill_value=0
+        )
+        fig_heat = px.imshow(
+            heat,
+            aspect="auto",
+            color_continuous_scale="YlGnBu",
+            title="Net Inflow by Category and Month",
+            labels={"x": "Month", "y": "Category", "color": "₹ crore"}
+        )
+        fig_heat.update_layout(template="plotly_dark", height=520, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_heat, use_container_width=True)
+
+    with tab_investors:
+        sip_txn = tx_df[tx_df["transaction_type"].eq("SIP")].copy()
+        col_a, col_b = st.columns(2)
+        with col_a:
+            st.subheader("Investor Age Group Split")
+            age_counts = tx_df["age_group"].value_counts().reset_index()
+            age_counts.columns = ["age_group", "transactions"]
+            fig_age = px.pie(age_counts, names="age_group", values="transactions", hole=0.35, title="Age Group Distribution")
+            fig_age.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_age, use_container_width=True)
+        with col_b:
+            st.subheader("Gender Split")
+            gender_counts = tx_df["gender"].value_counts().reset_index()
+            gender_counts.columns = ["gender", "transactions"]
+            fig_gender = px.pie(gender_counts, names="gender", values="transactions", hole=0.35, title="Gender Distribution")
+            fig_gender.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_gender, use_container_width=True)
+
+        st.subheader("SIP Amount by Age Group")
+        fig_box = px.box(sip_txn, x="age_group", y="amount_inr", color="age_group", title="SIP Ticket-Size Distribution")
+        fig_box.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_box, use_container_width=True)
+
+        col_c, col_d = st.columns(2)
+        with col_c:
+            state_sip = sip_txn.groupby("state", as_index=False)["amount_inr"].sum()
+            state_sip["amount_crore"] = state_sip["amount_inr"] / 1e7
+            fig_state = px.bar(state_sip.sort_values("amount_crore", ascending=True), x="amount_crore", y="state", orientation="h", title="SIP Amount by State", labels={"amount_crore": "₹ crore"})
+            fig_state.update_layout(template="plotly_dark", height=620, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_state, use_container_width=True)
+        with col_d:
+            tier_sip = sip_txn.groupby("city_tier", as_index=False)["amount_inr"].sum()
+            fig_tier = px.pie(tier_sip, names="city_tier", values="amount_inr", hole=0.35, title="T30 vs B30 SIP Amount Split")
+            fig_tier.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_tier, use_container_width=True)
+
+        st.subheader("Folio Count Growth")
+        fig_folios = px.line(folio_df.sort_values("month_dt"), x="month_dt", y="total_folios_crore", markers=True, title="Total Folios from Jan 2022 to Dec 2025", labels={"month_dt": "Month", "total_folios_crore": "Folios (crore)"})
+        for milestone in [15, 20, 25]:
+            crossed = folio_df[folio_df["total_folios_crore"] >= milestone].sort_values("month_dt")
+            if not crossed.empty:
+                row = crossed.iloc[0]
+                fig_folios.add_annotation(x=row["month_dt"], y=row["total_folios_crore"], text=f"{milestone} Cr", showarrow=True)
+        fig_folios.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_folios, use_container_width=True)
+
+    with tab_risk:
+        st.subheader("NAV Return Correlation Matrix")
+        selected_codes = data["performance"].sort_values("aum_crore", ascending=False)["amfi_code"].head(10).tolist()
+        selected_names = data["funds"].set_index("amfi_code").loc[selected_codes, "scheme_name"]
+        returns = data["nav_history"][data["nav_history"]["amfi_code"].isin(selected_codes)].pivot(index="date", columns="amfi_code", values="daily_return_pct")
+        returns.columns = [selected_names.loc[c][:34] for c in returns.columns]
+        corr = returns.corr()
+        fig_corr = px.imshow(corr, text_auto=".2f", color_continuous_scale="RdBu_r", zmin=-1, zmax=1, title="Daily Return Correlation - 10 Selected Funds")
+        fig_corr.update_layout(template="plotly_dark", height=680, plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_corr, use_container_width=True)
+
+        st.subheader("Aggregate Sector Allocation Across Equity Funds")
+        equity_codes = data["funds"].loc[data["funds"]["category"].eq("Equity"), "amfi_code"]
+        equity_holdings = data["portfolio"][data["portfolio"]["amfi_code"].isin(equity_codes)]
+        sector_weights = equity_holdings.groupby("sector", as_index=False)["weight_pct"].sum()
+        sector_weights["share_pct"] = sector_weights["weight_pct"] / sector_weights["weight_pct"].sum() * 100
+        fig_sector = px.pie(sector_weights.sort_values("share_pct", ascending=False), names="sector", values="share_pct", hole=0.55, title="Sector Allocation Donut")
+        fig_sector.update_layout(template="plotly_dark", paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_sector, use_container_width=True)
+
+        st.subheader("Performance Metrics Correlation")
+        perf_df = data["performance"][["return_1yr_pct", "return_3yr_pct", "sharpe_ratio", "std_dev_ann_pct"]].copy()
+        perf_df.columns = ["1Y Return", "3Y Return", "Sharpe Ratio", "Volatility"]
+        fig_perf = px.imshow(perf_df.corr(), text_auto=".2f", color_continuous_scale="RdBu_r", zmin=-1, zmax=1, title="Returns, Sharpe, and Volatility Correlation")
+        fig_perf.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_perf, use_container_width=True)
+
+    with tab_exports:
+        st.subheader("Exported PNG Charts for Final Report")
+        if exported_charts:
+            preview_cols = st.columns(3)
+            for idx, chart_path in enumerate(exported_charts[:12]):
+                with preview_cols[idx % 3]:
+                    st.image(str(chart_path), caption=chart_path.name, use_container_width=True)
+            if len(exported_charts) > 12:
+                st.info(f"{len(exported_charts) - 12} more charts are available in outputs/eda_charts.")
+        else:
+            st.warning("No exported EDA PNG charts found. Run notebooks/EDA_Analysis.ipynb to regenerate them.")
+
+# ---------------------------------------------------------------------------
+# Page 3: Fund Performance
 # ---------------------------------------------------------------------------
 elif "Fund Performance" in page:
     st.title("🏆 Mutual Fund Performance Analytics")

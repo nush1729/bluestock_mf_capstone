@@ -1,137 +1,289 @@
 # Bluestock Mutual Fund Analytics Platform
 
-![Bluestock Mutual Fund Analytics](assets/readme/animated-market-brief.svg)
+<p align="center">
+  <img src="assets/readme/animated-market-brief.svg" alt="Bluestock Analytics" width="600"/>
+</p>
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-2563eb?style=for-the-badge&labelColor=0f172a)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-ef4444?style=for-the-badge&labelColor=0f172a)
-![SQLite](https://img.shields.io/badge/SQLite-Star%20Schema-22c55e?style=for-the-badge&labelColor=0f172a)
-![Analytics](https://img.shields.io/badge/Analytics-Risk%20%7C%20Return%20%7C%20ML-f59e0b?style=for-the-badge&labelColor=0f172a)
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.9%2B-2563eb?style=for-the-badge&labelColor=0f172a" alt="Python"/>
+  <img src="https://img.shields.io/badge/SQLite-Star%20Schema-10b981?style=for-the-badge&labelColor=0f172a" alt="SQLite"/>
+  <img src="https://img.shields.io/badge/Pandas-Data%20Pipeline-f59e0b?style=for-the-badge&labelColor=0f172a" alt="Pandas"/>
+  <img src="https://img.shields.io/badge/Matplotlib-22%20Charts-8b5cf6?style=for-the-badge&labelColor=0f172a" alt="Matplotlib"/>
+  <img src="https://img.shields.io/badge/Status-Complete%20v1.0-10b981?style=for-the-badge&labelColor=0f172a" alt="Status"/>
+</p>
 
-Bluestock Mutual Fund Analytics is a full-stack data engineering and investment analytics project for Indian mutual funds. It turns fragmented CSV datasets into a cleaned warehouse, computes fund-level performance and risk metrics, and serves the results through notebooks, reports, SQL, and an interactive Streamlit dashboard.
+> **7-day analytics capstone** — End-to-end mutual fund analytics platform covering ETL, EDA, performance metrics, risk analytics, dashboard, and final reporting for the Indian mutual fund industry (2022–2025).
 
-The project currently covers 40 schemes across 10 AMCs, 46,000 NAV records from 2022-01-03 to 2026-05-29, 32,778 investor transactions, 322 portfolio holdings, 7 benchmark indices, and a latest industry AUM snapshot of 62.74 lakh crore.
+---
 
-## What It Does
+## 📋 Project Overview
 
-| Layer | Feature | What is inside | Output |
-|---|---|---|---|
-| Data ingestion | Raw-to-processed CSV loading | 10 mutual fund datasets loaded and profiled through notebook checks | `data/processed/*.csv` |
-| ETL pipeline | Validation, transformation, loading | NAV forward fill, daily returns, schema alignment, SQLite load | `scripts/etl_pipeline.py` |
-| Warehouse | Star schema model | Fund, date, NAV, AUM, SIP, inflow, transaction, portfolio, and benchmark tables | `sql/schema.sql` |
-| Metrics engine | Fund performance and risk | 1Y return, 3Y CAGR, Sharpe, Sortino, alpha, beta, drawdown, VaR, CVaR | `outputs/performance_metrics.csv` |
-| Dashboard | Decision cockpit | Executive KPIs, fund comparison, risk analytics, recommendations, demographics, portfolio concentration | `streamlit_app.py` |
-| Advanced analytics | ML and optimization | K-Means segmentation, Monte Carlo NAV simulation, Markowitz efficient frontier | `notebooks/05_advanced_analytics.ipynb` |
-| Reporting | Business-ready summaries | Automated PDF, PPTX, and HTML weekly summary reports | `reports/` |
-| Bonus utilities | Live and scheduled workflows | Live NAV fetch, email summary generation, cron setup helper | `scripts/` |
-
-## Notebook Evidence
-
-These charts are exported from the project notebooks and kept as README assets so the repository tells the analytical story without asking the reader to open Jupyter first.
-
-| Market scale and flows | Fund behavior and risk |
+| | |
 |---|---|
-| ![AUM growth by fund house](assets/readme/aum-growth-fund-house.png) | ![NAV trend for top funds](assets/readme/nav-trend-top-funds.png) |
-| ![Monthly SIP inflow trend](assets/readme/monthly-sip-trend.png) | ![Risk return tradeoff](assets/readme/risk-return-tradeoff.png) |
+| **Industry** | Indian Mutual Funds (AMFI/SEBI regulated) |
+| **Dataset** | 10 CSV files · 40 schemes · 64,320 NAV rows · 32,778 transactions |
+| **Period** | January 2022 – December 2025 |
+| **Database** | SQLite star schema (8 tables) |
+| **Metrics** | 12+ risk-adjusted metrics per fund |
+| **Deliverables** | Notebooks · Dashboard · Final Report · 12-slide Deck |
 
-| Advanced analytics | Portfolio optimization |
-|---|---|
-| ![Fund clusters by risk and return](assets/readme/fund-clusters.png) | ![Markowitz efficient frontier](assets/readme/efficient-frontier.png) |
-| ![Monte Carlo simulation](assets/readme/monte-carlo-simulation.png) | Segmentation, simulation, and optimization extend the project beyond descriptive analytics into portfolio decision support. |
+### Key Numbers
 
-## Current Results Snapshot
+| Metric | Value |
+|--------|-------|
+| Total Industry AUM | ₹68 Lakh Crore (Dec 2025) |
+| Peak SIP Inflow | ₹31,002 Crore (Dec 2025) |
+| Total Folios | 26.12 Crore |
+| Best Composite Score | 85.12 — ICICI Pru Midcap |
+| Best Sharpe Ratio | 1.07 — Mirae Asset Large Cap |
+| SIP Growth (4yr) | +181% (₹11,035 Cr → ₹31,002 Cr) |
 
-| Signal | Current value |
-|---|---:|
-| Funds analyzed | 40 |
-| Fund houses covered | 10 |
-| Fund categories | 12 |
-| NAV records | 46,000 |
-| Benchmark records | 8,050 |
-| Investor transactions | 32,778 |
-| Portfolio holdings | 322 |
-| Latest SIP inflow | 31,002 crore in 2025-12 |
-| Latest total AUM snapshot | 62.74 lakh crore on 2025-12-31 |
-| Average computed Sharpe ratio | 0.54 |
-| Highest computed alpha | 31.51 percent |
+---
 
-Top 3 schemes by computed 3-year return in the latest metrics output:
+## 🗂️ Project Structure
 
-| Rank | Scheme | 3Y return | Sharpe |
-|---:|---|---:|---:|
-| 1 | Axis Midcap Fund - Regular - Growth | 33.67 percent | 1.00 |
-| 2 | Mirae Asset Large Cap Fund - Regular - Growth | 32.61 percent | 1.45 |
-| 3 | ICICI Pru Bluechip Fund - Direct - Growth | 31.16 percent | 1.03 |
-
-## Repository Map
-
-```text
+```
 bluestock/
-|-- assets/readme/                 # README banner and notebook chart exports
-|-- dashboard/                     # Power BI dashboard specification
-|-- data/processed/                # Cleaned mutual fund datasets
-|-- notebooks/                     # Day-wise ingestion, cleaning, EDA, performance, ML
-|-- outputs/                       # Computed metric outputs
-|-- reports/                       # PDF, PPTX, and HTML reports
-|-- scripts/                       # ETL, metrics, recommender, reporting, live NAV utilities
-|-- sql/                           # Schema and analytical queries
-|-- streamlit_app.py               # Streamlit analytics portal
-|-- requirements.txt               # Python dependencies
-`-- setup_venv.sh                  # Environment helper
+├── data/
+│   ├── raw/                    # 10 original CSV datasets
+│   ├── processed/              # ETL-cleaned CSVs (clean_*.csv)
+│   └── db/
+│       └── bluestock_mf.db     # SQLite star-schema database
+│
+├── notebooks/
+│   ├── 01_data_ingestion.ipynb     # Day 1: Data loading & exploration
+│   ├── 02_data_cleaning.ipynb      # Day 2: Cleaning & DB load
+│   ├── 03_eda_analysis.ipynb       # Day 3: EDA — 22 publication charts
+│   ├── 04_performance_analytics.ipynb  # Day 4: Returns, Sharpe, Scorecard
+│   ├── 05_advanced_analytics.ipynb # Day 6: VaR, Cohort, HHI, Recommender
+│   └── EDA_Findings.ipynb          # 10 key EDA findings (markdown)
+│
+├── scripts/
+│   ├── etl_pipeline.py             # Master ETL: extract → clean → load
+│   ├── live_nav_fetch.py           # AMFI API live NAV updater
+│   ├── data_ingestion.py           # CSV ingestion & shape report
+│   ├── day4_performance.py         # CAGR, Sharpe, Alpha, Scorecard
+│   ├── day5_dashboard_export.py    # Dashboard 4-page PNGs + PDF
+│   ├── day6_advanced.py            # VaR/CVaR, rolling Sharpe, HHI
+│   ├── day7_report_presentation.py # Final PDF report + PPTX
+│   ├── recommender.py              # Fund recommendation engine
+│   ├── run_queries.py              # SQL query executor
+│   ├── generate_deliverables.py    # Evidence & audit file generator
+│   ├── email_report_generator.py   # Weekly HTML report (Bonus B5)
+│   └── setup_cron.py               # Cron scheduler setup (Bonus B1)
+│
+├── outputs/
+│   ├── eda_charts/             # 23 EDA chart PNGs
+│   ├── returns_computed.csv    # Daily returns for all 40 funds
+│   ├── cagr_report.csv         # 1yr/3yr/5yr CAGR
+│   ├── sharpe_values.csv       # Sharpe ratios
+│   ├── sortino_values.csv      # Sortino ratios
+│   ├── alpha_beta.csv          # Alpha & Beta (OLS vs benchmark)
+│   ├── max_drawdown.csv        # Maximum drawdown per fund
+│   ├── fund_scorecard.csv      # Composite 0–100 ranking
+│   ├── benchmark_chart.png     # Top 5 vs Nifty benchmark
+│   ├── var_cvar_report.csv     # Historical VaR & CVaR (95%)
+│   ├── rolling_sharpe_chart.png # Rolling 90-day Sharpe
+│   ├── cohort_analysis.csv     # Investor cohort analysis
+│   ├── sip_continuity.csv      # SIP at-risk investor flags
+│   └── sector_hhi.csv          # Herfindahl-Hirschman Index
+│
+├── dashboard/
+│   ├── page1_industry_overview.png
+│   ├── page2_fund_performance.png
+│   ├── page3_investor_analytics.png
+│   ├── page4_sip_trends.png
+│   ├── Dashboard.pdf           # Combined 4-page dashboard PDF
+│   ├── bluestock_mf_dashboard.pbix  # Power BI data model spec
+│   └── PowerBI_Dashboard_Spec.md
+│
+├── reports/
+│   ├── Final_Report.pdf        # 15-page comprehensive project report
+│   ├── Bluestock_MF_Presentation.pptx  # 12-slide presentation deck
+│   ├── data_dictionary.md      # Field-level data dictionary
+│   ├── csv_ingestion_audit.md  # CSV ingestion audit trail
+│   └── Weekly_Summary.html     # HTML weekly report (Bonus)
+│
+├── sql/
+│   ├── queries.sql             # All analytical SQL queries
+│   └── queries_results.md      # Query output markdown
+│
+├── run_pipeline.py             # ⭐ Master orchestration script
+├── streamlit_app.py            # Full Streamlit web dashboard
+├── requirements.txt            # Python dependencies
+└── README.md                   # This file
 ```
 
-## Run Locally
+---
 
-Create and activate an environment, then install dependencies:
+## 🚀 Quick Start
+
+### 1. Clone & Setup
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+git clone https://github.com/nush1729/bluestock_mf_capstone.git
+cd bluestock_mf_capstone
+
+# Install dependencies
+pip3 install -r requirements.txt
 ```
 
-Run the pipeline and compute the analytics layer:
+### 2. Run Full Pipeline
 
 ```bash
+# Complete run: ETL → Metrics → Dashboard → Report (~5 minutes)
+python run_pipeline.py
+
+# Skip live NAV fetch (offline/CI mode)
+python run_pipeline.py --skip-live
+
+# Run only a specific step
+python run_pipeline.py --only metrics
+
+# Resume from a specific step
+python run_pipeline.py --from dashboard
+```
+
+### 3. Run Individual Components
+
+```bash
+# ETL pipeline (creates/refreshes SQLite DB)
 python scripts/etl_pipeline.py
-python scripts/compute_metrics.py
+
+# Performance metrics (Day 4)
+python scripts/day4_performance.py
+
+# Dashboard export (Day 5)
+python scripts/day5_dashboard_export.py
+
+# Advanced analytics (Day 6)
+python scripts/day6_advanced.py
+
+# Fund recommendation
+python scripts/recommender.py --risk Moderate
+python scripts/recommender.py --risk High
+
+# Final report + presentation (Day 7)
+python scripts/day7_report_presentation.py
 ```
 
-Launch the dashboard:
+### 4. Launch Streamlit Dashboard
 
 ```bash
 streamlit run streamlit_app.py
+# Opens at http://localhost:8501
 ```
 
-Generate final reporting artifacts:
+### 5. Open Notebooks
 
 ```bash
-python scripts/generate_report_slides.py
+jupyter lab notebooks/
 ```
 
-## Dashboard Pages
+---
 
-| Page | Purpose |
-|---|---|
-| Home | Project entry point and analytics overview |
-| Executive Summary | AUM, SIP, NAV, and market-level KPIs |
-| Fund Performance | Return, benchmark, and scheme comparison views |
-| Risk Analytics | Volatility, Sharpe, Sortino, alpha, beta, VaR, CVaR, drawdown |
-| Recommendation Center | Rule-based fund recommendations by investor profile |
-| Investor Demographics | Transaction patterns by investor segment |
-| Portfolio and Concentration | Holdings, sector exposure, and concentration checks |
-| Simulations and Optimization | Monte Carlo and efficient-frontier analysis |
+## 🗄️ Database Schema
 
-## Technical Stack
+SQLite star schema with `amfi_code` as the central key:
 
-| Area | Tools |
-|---|---|
-| Data processing | Python, pandas, NumPy |
-| Statistical analytics | SciPy, scikit-learn |
-| Visualization | Matplotlib, Seaborn, Plotly |
-| Data storage | SQLite, SQL star schema |
-| Application | Streamlit |
-| Reporting | ReportLab, python-pptx, HTML email templates |
+```
+              ┌─────────────┐
+              │  dim_fund   │  ← Central dimension (40 funds)
+              │ (amfi_code) │
+              └──────┬──────┘
+                     │
+    ┌────────────────┼────────────────┬────────────────┐
+    │                │                │                │
+┌───┴──────┐  ┌──────┴──────┐  ┌─────┴──────┐  ┌─────┴────────────┐
+│ fact_nav │  │fact_perf    │  │fact_aum    │  │fact_transactions  │
+│ 64K rows │  │returns,risk │  │monthly AUM │  │32K investor txns  │
+└──────────┘  └─────────────┘  └────────────┘  └──────────────────┘
+                                                        │
+┌──────────────┐  ┌────────────────┐          ┌────────┴──────┐
+│fact_portfolio│  │ fact_benchmark │          │   dim_date    │
+│ holdings/wt  │  │ 6 index series │          │ date attrs    │
+└──────────────┘  └────────────────┘          └───────────────┘
+```
 
-## Notes for Reviewers
+---
 
-The repository is built to be read in the same order as the project workflow: ingestion notebook, cleaning notebook, EDA notebook, performance notebook, advanced analytics notebook, ETL scripts, dashboard, and reports. The README charts mirror that path and show the project moving from dataset validation to market trends, risk-return analytics, clustering, simulation, and optimization.
+## 📊 Performance Metrics
+
+All metrics computed with **Risk-Free Rate = 6.5%** (RBI repo rate proxy), **252 trading days/year**:
+
+| Metric | Formula | Script |
+|--------|---------|--------|
+| 1yr/3yr/5yr CAGR | `(NAV_end/NAV_start)^(252/n) - 1` | `day4_performance.py` |
+| Sharpe Ratio | `(R_p - R_f) / σ_p × √252` | `day4_performance.py` |
+| Sortino Ratio | `(R_p - R_f) / σ_downside × √252` | `day4_performance.py` |
+| Alpha | OLS intercept vs benchmark × 252 × 100 | `day4_performance.py` |
+| Beta | OLS slope vs assigned benchmark | `day4_performance.py` |
+| Max Drawdown | `min(NAV_t / cummax(NAV) - 1)` | `day4_performance.py` |
+| VaR 95% | `np.percentile(returns, 5)` | `day6_advanced.py` |
+| CVaR 95% | `mean(returns[returns ≤ VaR])` | `day6_advanced.py` |
+| HHI | `Σ(weight_i²)` per sector | `day6_advanced.py` |
+| Composite Score | `30% CAGR + 25% Sharpe + 20% Alpha + 15% Expense + 10% Drawdown` | `day4_performance.py` |
+
+---
+
+## 🏆 Top Fund Scorecard
+
+| Rank | Fund | Category | Score | 3yr CAGR | Sharpe |
+|------|------|----------|-------|----------|--------|
+| 1 | ICICI Pru Midcap Fund | Mid Cap | 85.12 | 21.0% | 0.88 |
+| 2 | Axis Midcap Fund | Mid Cap | 83.00 | 23.1% | 0.73 |
+| 3 | Mirae Asset Large Cap | Large Cap | 80.50 | 22.4% | 1.07 |
+| 4 | HDFC Mid-Cap Opportunities | Mid Cap | 79.00 | 21.4% | 0.81 |
+| 5 | Kotak Flexicap Fund | Flexi Cap | 78.75 | 19.6% | 0.97 |
+
+---
+
+## 🔧 Requirements
+
+```
+pandas>=1.5.0
+numpy>=1.23.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+plotly>=5.11.0
+scipy>=1.9.0
+sqlalchemy>=1.4.0
+requests>=2.28.0
+reportlab>=3.6.0
+python-pptx>=0.6.21
+tabulate>=0.9.0
+streamlit>=1.20.0
+jupyter>=1.0.0
+```
+
+---
+
+## 📁 Day-by-Day Deliverables
+
+| Day | Focus | Key Deliverables |
+|-----|-------|-----------------|
+| 1 | Project Setup + Data Ingestion | `scripts/data_ingestion.py`, `01_data_ingestion.ipynb` |
+| 2 | ETL + Database | `scripts/etl_pipeline.py`, `data/db/bluestock_mf.db`, `02_data_cleaning.ipynb` |
+| 3 | EDA | `03_eda_analysis.ipynb` (22 charts), `outputs/eda_charts/` (23 PNGs) |
+| 4 | Performance Analytics | `outputs/fund_scorecard.csv`, `outputs/benchmark_chart.png`, `04_performance_analytics.ipynb` |
+| 5 | Dashboard | `dashboard/Dashboard.pdf`, 4 page PNGs, `bluestock_mf_dashboard.pbix` |
+| 6 | Advanced Analytics | `outputs/var_cvar_report.csv`, `rolling_sharpe_chart.png`, `scripts/recommender.py` |
+| 7 | Report + Presentation | `reports/Final_Report.pdf`, `reports/Bluestock_MF_Presentation.pptx` |
+
+---
+
+## 🔗 Links
+
+- **GitHub:** [github.com/nush1729/bluestock_mf_capstone](https://github.com/nush1729/bluestock_mf_capstone)
+- **AMFI API:** [mfapi.in](https://mfapi.in)
+- **SEBI Data:** [sebi.gov.in](https://www.sebi.gov.in)
+
+---
+
+## ⚠️ Disclaimer
+
+This project is for **educational purposes only**. All analysis uses publicly available AMFI/SEBI data. Past performance does not guarantee future results. This is not investment advice.
+
+---
+
+*© 2026 Anushka Nair · Bluestock Fintech Mutual Fund Analytics Capstone*

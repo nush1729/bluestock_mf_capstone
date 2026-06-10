@@ -34,17 +34,11 @@ echo -e "${GREEN}✓ Dependencies installed successfully.${NC}"
 
 # 4. Run the Data Pipeline & Metrics Computations
 echo -e "\n${YELLOW}[STEP 4/5] Executing ETL Pipeline & Metrics Computations...${NC}"
-echo -e "${BLUE}  Running ETL Ingestion...${NC}"
-python scripts/etl_pipeline.py
-
-echo -e "${BLUE}  Running Metrics Computation Engine...${NC}"
-python scripts/compute_metrics.py
+echo -e "${BLUE}  Running Master Analytics Pipeline...${NC}"
+python run_pipeline.py --skip-live
 
 echo -e "${BLUE}  Generating Weekly Email Summary Report...${NC}"
 python scripts/email_report_generator.py
-
-echo -e "${BLUE}  Generating Final PDF Report & PowerPoint Slides...${NC}"
-python scripts/generate_report_slides.py
 
 echo -e "${BLUE}  Configuring Auto-Scheduler Cron Job (Weekday at 8:00 PM)...${NC}"
 python scripts/setup_cron.py

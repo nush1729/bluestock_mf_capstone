@@ -90,7 +90,7 @@ ax1.axvline(-2.5, color=RED, linewidth=1.2, linestyle='--')
 
 # CVaR scatter
 ax2.scatter(var_df['var_95_pct'], var_df['cvar_95_pct'],
-            c=PAL[:len(var_df)], s=60, alpha=0.8, edgecolors=BG)
+            color=BLUE, s=60, alpha=0.8, edgecolors=BG)
 x = var_df['var_95_pct']
 slope, intercept, _, _, _ = stats.linregress(x, var_df['cvar_95_pct'])
 ax2.plot(sorted(x), [intercept + slope*v for v in sorted(x)], color=AMBER, linewidth=1.5, linestyle='--')
@@ -219,7 +219,7 @@ sys.path.insert(0, str(Path('.') / 'scripts'))
 from recommender import get_recommendations
 
 for risk in ['Low', 'Moderate', 'High']:
-    print(f'\\n{'='*65}')
+    print(f'\\n{"="*65}')
     rec = get_recommendations(risk)
     print()
 """)
@@ -277,7 +277,8 @@ nb = {
     "nbformat_minor": 5
 }
 
-out = PROJECT_ROOT / "notebooks" / "Advanced_Analytics.ipynb"
+out = PROJECT_ROOT / "notebooks" / "05_advanced_analytics.ipynb"
 with open(out, "w", encoding="utf-8") as f:
     json.dump(nb, f, indent=2)
 print(f"Written: {out} ({len(cells)} cells)")
+

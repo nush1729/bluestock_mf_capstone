@@ -269,7 +269,8 @@ nb = {
     "nbformat_minor": 5
 }
 
-out_path = PROJECT_ROOT / "notebooks" / "Performance_Analytics.ipynb"
+out_path = PROJECT_ROOT / "notebooks" / "04_performance_analytics.ipynb"
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(nb, f, indent=2)
 print(f"Written: {out_path} ({len(cells)} cells)")
+

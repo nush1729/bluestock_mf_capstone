@@ -554,10 +554,10 @@ elif "Executive Summary" in page:
 # ---------------------------------------------------------------------------
 elif "EDA Analysis" in page:
     st.title("🔎 Day 3 Exploratory Data Analysis")
-    st.markdown("Interactive frontend companion for `notebooks/EDA_Analysis.ipynb` with the completed Day 3 chart set and report exports.")
+    st.markdown("Interactive frontend companion for `notebooks/03_eda_analysis.ipynb` with the completed Day 3 chart set and report exports.")
 
     chart_dir = Path(__file__).resolve().parent / "outputs" / "eda_charts"
-    notebook_path = Path(__file__).resolve().parent / "notebooks" / "EDA_Analysis.ipynb"
+    notebook_path = Path(__file__).resolve().parent / "notebooks" / "03_eda_analysis.ipynb"
     exported_charts = sorted(chart_dir.glob("*.png")) if chart_dir.exists() else []
 
     nav_df = data["nav_history"].merge(
@@ -755,7 +755,7 @@ elif "EDA Analysis" in page:
             if len(exported_charts) > 12:
                 st.info(f"{len(exported_charts) - 12} more charts are available in outputs/eda_charts.")
         else:
-            st.warning("No exported EDA PNG charts found. Run notebooks/EDA_Analysis.ipynb to regenerate them.")
+            st.warning("No exported EDA PNG charts found. Run notebooks/03_eda_analysis.ipynb to regenerate them.")
 
 # ---------------------------------------------------------------------------
 # Page 3: Fund Performance

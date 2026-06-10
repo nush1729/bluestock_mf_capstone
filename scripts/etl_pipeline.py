@@ -345,6 +345,21 @@ def save_processed_csvs(cleaned: dict):
         df.to_csv(fp, index=False)
         logger.info(f"  Saved: {fp.name} ({len(df)} rows)")
 
+        # Save copies with requested Day 2 deliverable names
+        if name == "nav_history":
+            clean_fp = PROCESSED_DIR / "clean_nav.csv"
+            df.to_csv(clean_fp, index=False)
+            logger.info(f"  Saved copy: {clean_fp.name} ({len(df)} rows)")
+        elif name == "investor_transactions":
+            clean_fp = PROCESSED_DIR / "clean_transactions.csv"
+            df.to_csv(clean_fp, index=False)
+            logger.info(f"  Saved copy: {clean_fp.name} ({len(df)} rows)")
+        elif name == "scheme_performance":
+            clean_fp = PROCESSED_DIR / "clean_performance.csv"
+            df.to_csv(clean_fp, index=False)
+            logger.info(f"  Saved copy: {clean_fp.name} ({len(df)} rows)")
+
+
 
 def load_sqlite(cleaned: dict):
     """Create SQLite database and load all data."""

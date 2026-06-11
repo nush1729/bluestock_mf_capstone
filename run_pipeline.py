@@ -10,6 +10,7 @@ Runs the complete end-to-end analytics pipeline in the correct order:
   Step 4: Day 5 — Generate dashboard page PNGs and Dashboard.pdf
   Step 5: Day 6 — Advanced analytics (VaR, Rolling Sharpe, Cohort, HHI)
   Step 6: Day 7 — Build Final_Report.pdf and Bluestock_MF_Presentation.pptx
+  Step 7: Bonus — Monte Carlo simulation + Markowitz Efficient Frontier
 
 Usage:
     python run_pipeline.py                  # full run
@@ -91,9 +92,17 @@ STEPS = {
             "reports/Bluestock_MF_Presentation.pptx",
         ],
     },
+    "bonus": {
+        "label": "Bonus B3/B4: Monte Carlo + Markowitz Efficient Frontier",
+        "script": "scripts/complete_project.py",
+        "expected_outputs": [
+            "outputs/monte_carlo_simulation.png",
+            "outputs/efficient_frontier.png",
+        ],
+    },
 }
 
-STEP_ORDER = ["etl", "live", "metrics", "dashboard", "advanced", "report"]
+STEP_ORDER = ["etl", "live", "metrics", "dashboard", "advanced", "report", "bonus"]
 
 
 def run_step(step_key: str, skip_live: bool = False) -> bool:
@@ -215,11 +224,13 @@ def main():
         log.info(f"    {status} {STEPS[k]['label']}")
     log.info("")
     log.info("  Key outputs:")
-    log.info("    data/db/bluestock_mf.db          — SQLite database")
-    log.info("    outputs/fund_scorecard.csv        — Composite fund ranking")
-    log.info("    dashboard/Dashboard.pdf           — 4-page dashboard PDF")
-    log.info("    reports/Final_Report.pdf          — 15-page project report")
+    log.info("    data/db/bluestock_mf.db                — SQLite database (12 tables)")
+    log.info("    outputs/fund_scorecard.csv              — Composite fund ranking")
+    log.info("    dashboard/Dashboard.pdf                 — 4-page dashboard PDF")
+    log.info("    reports/Final_Report.pdf                — Final project report")
     log.info("    reports/Bluestock_MF_Presentation.pptx — 12-slide deck")
+    log.info("    outputs/monte_carlo_simulation.png      — Bonus B3: Monte Carlo")
+    log.info("    outputs/efficient_frontier.png          — Bonus B4: Markowitz")
     log.info("=" * 65)
 
 

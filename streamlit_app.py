@@ -17,80 +17,235 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Premium CSS Styling (Glassmorphism, Dark-mode, Custom Fonts, 3D Effects)
+# Custom Premium CSS Styling — Yellow & Black 3D Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Orbitron:wght@600;800&family=Inter:wght@400;600;700&display=swap');
 
-    /* Global Dark Mode & Typography */
+    :root {
+        --accent: #ffd60a;
+        --accent-2: #ffb700;
+        --bg-deep: #0a0a0a;
+        --bg-panel: #121212;
+    }
+
+    /* Global Dark/Black Mode & Typography */
     .stApp {
-        background-color: #0b0f19;
-        color: #e2e8f0;
+        background-color: var(--bg-deep);
+        background-image:
+            radial-gradient(circle at 15% 20%, rgba(255, 214, 10, 0.06) 0%, transparent 35%),
+            radial-gradient(circle at 85% 80%, rgba(255, 183, 0, 0.05) 0%, transparent 40%);
+        color: #f5f5f0;
         font-family: 'Inter', sans-serif;
     }
-    
+
     h1, h2, h3 {
         font-family: 'Space Grotesk', sans-serif;
-        color: #38bdf8 !important;
+        color: var(--accent) !important;
         font-weight: 700 !important;
     }
-    
-    /* 3D Glassmorphic Cards (Framer Motion inspired) */
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #050505;
+        border-right: 1px solid rgba(255, 214, 10, 0.15);
+    }
+    section[data-testid="stSidebar"] * {
+        color: #f5f5f0;
+    }
+
+    /* Buttons */
+    .stButton > button, .stDownloadButton > button {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0a0a0a;
+        font-weight: 800;
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(255, 214, 10, 0.35);
+        transition: all 0.25s ease;
+    }
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 10px 28px rgba(255, 214, 10, 0.5);
+        color: #0a0a0a;
+    }
+
+    /* 3D Glassmorphic Cards */
     .glass-card {
-        background: rgba(17, 24, 39, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(145deg, rgba(30,30,30,0.85), rgba(10,10,10,0.85));
+        border: 1px solid rgba(255, 214, 10, 0.15);
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 214, 10, 0.08);
         backdrop-filter: blur(12px);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         transform-style: preserve-3d;
         perspective: 1000px;
     }
-    
+
     .glass-card:hover {
-        transform: translateY(-5px) rotateX(2deg) rotateY(2deg);
-        border-color: rgba(56, 189, 248, 0.4);
-        box-shadow: 0 20px 40px rgba(56, 189, 248, 0.15);
+        transform: translateY(-6px) rotateX(3deg) rotateY(-2deg);
+        border-color: rgba(255, 214, 10, 0.5);
+        box-shadow: 0 24px 48px rgba(255, 214, 10, 0.18);
     }
-    
+
     .card-title {
         font-size: 14px;
-        color: #94a3b8;
+        color: #c9c9c0;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 8px;
     }
-    
+
     .card-value {
         font-size: 36px;
-        color: #f8fafc;
+        color: var(--accent);
         font-weight: 800;
         font-family: 'Space Grotesk', sans-serif;
+        text-shadow: 0 0 18px rgba(255, 214, 10, 0.35);
     }
-    
+
     /* Sub-text tags */
     .trend-up {
-        color: #10b981;
+        color: #ffe066;
         font-weight: 600;
         font-size: 14px;
     }
-    
+
+    /* === 3D Animated Hero Elements === */
+    .hero-wrap {
+        position: relative;
+        text-align: center;
+        padding: 70px 20px 50px 20px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        border-radius: 24px;
+        background: radial-gradient(ellipse at center, rgba(255,214,10,0.08) 0%, rgba(10,10,10,0) 70%);
+    }
+
+    .scene3d {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .cube {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        transform-style: preserve-3d;
+        animation: spin 14s linear infinite, float 7s ease-in-out infinite;
+    }
+    .cube .face {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border: 2px solid rgba(255, 214, 10, 0.55);
+        background: rgba(255, 214, 10, 0.06);
+        box-shadow: 0 0 18px rgba(255, 214, 10, 0.25);
+    }
+    .cube .front  { transform: translateZ(30px); }
+    .cube .back   { transform: translateZ(-30px) rotateY(180deg); }
+    .cube .right  { transform: rotateY(90deg) translateZ(30px); }
+    .cube .left   { transform: rotateY(-90deg) translateZ(30px); }
+    .cube .top    { transform: rotateX(90deg) translateZ(30px); }
+    .cube .bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+    .cube.c1 { top: 10%;  left: 8%;  width: 50px; height: 50px; animation-duration: 16s, 6s; }
+    .cube.c1 .face { width: 50px; height: 50px; }
+    .cube.c1 .front, .cube.c1 .back   { transform: translateZ(25px); }
+    .cube.c1 .back  { transform: translateZ(-25px) rotateY(180deg); }
+    .cube.c1 .right, .cube.c1 .left   { transform: rotateY(90deg) translateZ(25px); }
+    .cube.c1 .left  { transform: rotateY(-90deg) translateZ(25px); }
+    .cube.c1 .top, .cube.c1 .bottom   { transform: rotateX(90deg) translateZ(25px); }
+    .cube.c1 .bottom { transform: rotateX(-90deg) translateZ(25px); }
+
+    .cube.c2 { top: 60%; left: 85%; width: 40px; height: 40px; animation-duration: 11s, 8s; animation-direction: reverse; }
+    .cube.c3 { top: 75%; left: 15%; width: 35px; height: 35px; animation-duration: 19s, 5.5s; }
+    .cube.c4 { top: 18%; left: 80%; width: 45px; height: 45px; animation-duration: 13s, 9s; animation-direction: reverse; }
+
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #ffe066, #ffb700 60%, transparent 100%);
+        filter: blur(1px);
+        opacity: 0.5;
+        animation: float 9s ease-in-out infinite, pulse 4s ease-in-out infinite;
+    }
+    .orb.o1 { width: 120px; height: 120px; top: 5%;  left: 40%; animation-duration: 10s, 5s; }
+    .orb.o2 { width: 70px;  height: 70px;  top: 65%; left: 70%; animation-duration: 8s, 4s; }
+    .orb.o3 { width: 45px;  height: 45px;  top: 40%; left: 5%;  animation-duration: 12s, 6s; }
+
+    @keyframes spin {
+        from { transform: rotateX(0deg) rotateY(0deg); }
+        to   { transform: rotateX(360deg) rotateY(360deg); }
+    }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50%      { transform: translateY(-22px); }
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 0.35; transform: scale(1); }
+        50%      { opacity: 0.65; transform: scale(1.15); }
+    }
+
+    .hero-content { position: relative; z-index: 1; }
+
+    .hero-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: 3.4em;
+        font-weight: 800;
+        letter-spacing: 3px;
+        background: linear-gradient(135deg, #ffe066, #ffd60a, #ffb700);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 40px rgba(255, 214, 10, 0.25);
+        margin-bottom: 10px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25em;
+        color: #d4d4cc;
+        max-width: 760px;
+        margin: 0 auto 30px auto;
+        line-height: 1.7;
+    }
+
+    .badge-row {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 20px;
+    }
+    .badge {
+        background: rgba(255, 214, 10, 0.08);
+        border: 1px solid rgba(255, 214, 10, 0.35);
+        color: var(--accent);
+        padding: 6px 16px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+    }
+
     /* Elegant Custom Scrollbar */
     ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
     }
     ::-webkit-scrollbar-track {
-        background: #0b0f19;
+        background: var(--bg-deep);
     }
     ::-webkit-scrollbar-thumb {
-        background: #1e293b;
+        background: #2a2a2a;
         border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-        background: #38bdf8;
+        background: var(--accent);
     }
 </style>
 """, unsafe_allow_html=True)
@@ -155,27 +310,40 @@ data = load_data()
 # Sidebar Navigation System (With Beautiful Custom Text Logo)
 # ---------------------------------------------------------------------------
 st.sidebar.markdown("""
-<div style="background: linear-gradient(135deg, #0284c7, #0369a1); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.25); border: 1px solid rgba(255,255,255,0.1);">
-    <h2 style="color: white; margin: 0; font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 2px;">BLUESTOCK</h2>
-    <span style="color: rgba(255, 255, 255, 0.85); font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px;">MUTUAL FUND PORTAL</span>
+<div style="background: linear-gradient(135deg, #ffd60a, #ffb700); padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(255, 214, 10, 0.25); border: 1px solid rgba(255,255,255,0.1);">
+    <h2 style="color: #0a0a0a; margin: 0; font-family: 'Orbitron', sans-serif; font-size: 24px; letter-spacing: 2px;">BLUESTOCK</h2>
+    <span style="color: #0a0a0a; font-size: 11px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; opacity: 0.8;">MUTUAL FUND PORTAL</span>
 </div>
 """, unsafe_allow_html=True)
 
 st.sidebar.title("Navigation Hub")
 
+NAV_OPTIONS = [
+    "🏠 Home",
+    "🏛 Executive Summary",
+    "🔎 EDA Analysis",
+    "🏆 Fund Performance",
+    "🛡 Risk Analytics",
+    "🎯 Recommendation Center",
+    "👥 Investor Demographics",
+    "💼 Portfolio & Concentration",
+    "🎲 Simulations & Optimization"
+]
+
+# Allow the "Launch Dashboard" / card buttons on the Home page to
+# programmatically jump to another page. A button sets `pending_nav`,
+# which is applied to `nav_page` here -- BEFORE the radio widget is
+# instantiated -- avoiding the "cannot modify after widget instantiated" error.
+if "nav_page" not in st.session_state:
+    st.session_state.nav_page = NAV_OPTIONS[0]
+
+if "pending_nav" in st.session_state:
+    st.session_state.nav_page = st.session_state.pop("pending_nav")
+
 page = st.sidebar.radio(
     "Navigation System:",
-    [
-        "� Home",
-        "🏛 Executive Summary", 
-        "🔎 EDA Analysis",
-        "🏆 Fund Performance", 
-        "🛡 Risk Analytics", 
-        "🎯 Recommendation Center",
-        "👥 Investor Demographics",
-        "💼 Portfolio & Concentration",
-        "🎲 Simulations & Optimization"
-    ]
+    NAV_OPTIONS,
+    key="nav_page"
 )
 
 # Global Filters
@@ -206,22 +374,50 @@ if selected_category:
     filtered_fund_perf = filtered_fund_perf[filtered_fund_perf["sub_category"].isin(selected_category)]
 
 # ---------------------------------------------------------------------------
-# Page 0: 3D Interactive Hub (Futuristic Landing Page with Three.js)
+# Page 0: Landing Page — 3D Animated Hero + Launch Dashboard
 # ---------------------------------------------------------------------------
 if "Home" in page:
-    st.title("🏠 Welcome to Bluestock")
-    st.markdown("Intelligent Mutual Fund Analytics Platform for Data-Driven Investment Decisions")
-    
-    # Hero Section with Welcome Message
+
+    # --- 3D Animated Hero Section --------------------------------------
     st.markdown("""
-    <div class="glass-card" style="padding: 40px; text-align: center; margin-bottom: 30px;">
-        <h2 style="color: #38bdf8; font-size: 2.5em; margin-bottom: 15px;">Transform Your Fund Analytics</h2>
-        <p style="font-size: 1.1em; color: #94a3b8; line-height: 1.8;">
-            Access comprehensive mutual fund data, advanced performance metrics, risk analytics, and AI-powered recommendations in one integrated platform.
-        </p>
+    <div class="hero-wrap">
+        <div class="scene3d">
+            <div class="cube c1"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            <div class="cube c2"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            <div class="cube c3"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            <div class="cube c4"><div class="face front"></div><div class="face back"></div><div class="face right"></div><div class="face left"></div><div class="face top"></div><div class="face bottom"></div></div>
+            <div class="orb o1"></div>
+            <div class="orb o2"></div>
+            <div class="orb o3"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-title">BLUESTOCK</div>
+            <div class="hero-subtitle">
+                A full-stack <strong>Mutual Fund Analytics Platform</strong> for the Indian AMFI/SEBI universe —
+                ETL pipelines, 40-scheme performance scorecards, risk analytics (VaR, Sharpe, Sortino, Alpha/Beta),
+                investor demographics, Monte Carlo simulations, and Markowitz portfolio optimization —
+                all in one place.
+            </div>
+            <div class="badge-row">
+                <span class="badge">⚙️ 12-Table Star Schema</span>
+                <span class="badge">📈 40 Schemes Tracked</span>
+                <span class="badge">🛡 12+ Risk Metrics</span>
+                <span class="badge">🎲 Monte Carlo + Markowitz</span>
+                <span class="badge">👥 Investor Analytics</span>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
-    
+
+    # --- Launch Dashboard CTA --------------------------------------------
+    launch_col1, launch_col2, launch_col3 = st.columns([1, 1, 1])
+    with launch_col2:
+        if st.button("🚀  LAUNCH DASHBOARD", use_container_width=True, type="primary"):
+            st.session_state.pending_nav = "🏛 Executive Summary"
+            st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
     # Quick Stats Section
     st.subheader("📊 Industry Overview")
     
@@ -280,87 +476,49 @@ if "Home" in page:
         """, unsafe_allow_html=True)
     
     st.markdown("---")
-    
-    # Dashboard Navigation Section
+
+    # Dashboard Navigation Section — clickable cards that jump to each page
     st.subheader("🚀 Explore the Dashboard")
-    st.markdown("Choose a section below to dive deeper into mutual fund analytics:")
-    
-    nav_col1, nav_col2, nav_col3 = st.columns(3)
-    
-    with nav_col1:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🏛 Executive Summary</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Industry-wide metrics, quarterly AUM trends, SIP inflows, and category-wise net flows. Get a macro-level overview of the mutual fund landscape.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with nav_col2:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🏆 Fund Performance</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Deep dive into fund performance metrics: returns, rankings, performance vs benchmarks, and comparative analysis across categories.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with nav_col3:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🔎 EDA Analysis</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Day 3 exploratory analysis covering NAV trends, AUM concentration, SIP momentum, category flows, demographics, geography, and sector exposure.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    nav_col4, nav_col5, nav_col6 = st.columns(3)
-    
-    with nav_col4:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🎯 Recommendations</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                AI-powered fund recommendations based on portfolio optimization, Markowitz frontier analysis, and personalized investment goals.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with nav_col5:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">👥 Demographics</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Investor segmentation, demographic analysis, transaction patterns, and behavioral insights across the Indian mutual fund ecosystem.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with nav_col6:
-        st.markdown("""
-        <div class="glass-card" style="height: 220px; cursor: pointer;">
-            <h3 style="color: #38bdf8; margin: 0 0 10px 0;">🛡 Risk Analytics</h3>
-            <p style="color: #94a3b8; line-height: 1.6; margin: 0;">
-                Volatility, drawdowns, Value at Risk (VaR), Sharpe ratios, and correlation matrices for portfolio analysis.
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
+    st.markdown("Click any section below to jump straight there:")
+
+    sections = [
+        ("🏛", "Executive Summary", "Industry-wide metrics, quarterly AUM trends, SIP inflows, and category-wise net flows — a macro-level overview of the mutual fund landscape.", "🏛 Executive Summary"),
+        ("🏆", "Fund Performance", "Deep dive into returns, rankings, performance vs benchmarks, and comparative analysis across categories.", "🏆 Fund Performance"),
+        ("🔎", "EDA Analysis", "NAV trends, AUM concentration, SIP momentum, category flows, demographics, geography, and sector exposure.", "🔎 EDA Analysis"),
+        ("🎯", "Recommendations", "AI-powered fund recommendations based on portfolio optimization, Markowitz frontier analysis, and personalized investment goals.", "🎯 Recommendation Center"),
+        ("👥", "Demographics", "Investor segmentation, demographic analysis, transaction patterns, and behavioral insights across the Indian mutual fund ecosystem.", "👥 Investor Demographics"),
+        ("🛡", "Risk Analytics", "Volatility, drawdowns, Value at Risk (VaR), Sharpe ratios, and correlation matrices for portfolio analysis.", "🛡 Risk Analytics"),
+        ("💼", "Portfolio & Concentration", "Sector allocation, top holdings, and HHI-based concentration analysis for every equity scheme.", "💼 Portfolio & Concentration"),
+        ("🎲", "Simulations & Optimization", "Monte Carlo NAV projections (B3) and Markowitz Efficient Frontier portfolio optimization (B4).", "🎲 Simulations & Optimization"),
+    ]
+
+    for row_start in range(0, len(sections), 3):
+        row = sections[row_start:row_start + 3]
+        cols = st.columns(3)
+        for col, (icon, title, desc, target) in zip(cols, row):
+            with col:
+                st.markdown(f"""
+                <div class="glass-card" style="height: 200px;">
+                    <h3 style="margin: 0 0 10px 0;">{icon} {title}</h3>
+                    <p style="color: #c9c9c0; line-height: 1.6; margin: 0; font-size: 14px;">{desc}</p>
+                </div>
+                """, unsafe_allow_html=True)
+                if st.button(f"Open {title}", key=f"goto_{target}", use_container_width=True):
+                    st.session_state.pending_nav = target
+                    st.rerun()
+
     st.markdown("---")
-    
+
     # Features Highlight
     st.subheader("✨ Platform Capabilities")
-    
+
     feat_col1, feat_col2 = st.columns(2)
-    
+
     with feat_col1:
         st.markdown("""
         <div class="glass-card">
-            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">⚙️ Advanced Metrics</h4>
-            <ul style="color: #94a3b8; padding-left: 20px;">
+            <h4 style="margin: 0 0 10px 0;">⚙️ Advanced Metrics</h4>
+            <ul style="color: #c9c9c0; padding-left: 20px;">
                 <li>CAGR, Sharpe Ratio, Sortino Ratio</li>
                 <li>Alpha, Beta, and Maximum Drawdown</li>
                 <li>Value at Risk (VaR) and Conditional VaR</li>
@@ -368,12 +526,12 @@ if "Home" in page:
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with feat_col2:
         st.markdown("""
         <div class="glass-card">
-            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">📊 Data Pipeline</h4>
-            <ul style="color: #94a3b8; padding-left: 20px;">
+            <h4 style="margin: 0 0 10px 0;">📊 Data Pipeline</h4>
+            <ul style="color: #c9c9c0; padding-left: 20px;">
                 <li>Automated ETL Pipeline</li>
                 <li>Star Schema Data Warehouse</li>
                 <li>Real-time NAV Sync</li>
@@ -381,33 +539,30 @@ if "Home" in page:
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
+
     with st.columns(1)[0]:
         st.markdown("""
         <div class="glass-card">
-            <h4 style="color: #38bdf8; margin: 0 0 10px 0;">🤖 ML & Analytics</h4>
-            <p style="color: #94a3b8;">K-Means clustering for fund segmentation • Monte Carlo simulations for scenario planning • Markowitz portfolio optimization • Correlation analysis • Pattern recognition</p>
+            <h4 style="margin: 0 0 10px 0;">🤖 ML & Analytics</h4>
+            <p style="color: #c9c9c0;">K-Means clustering for fund segmentation • Monte Carlo simulations for scenario planning • Markowitz portfolio optimization • Correlation analysis • Pattern recognition</p>
         </div>
         """, unsafe_allow_html=True)
-    
+
     st.markdown("---")
-    
+
     # Call to Action
-    st.markdown("<div style='text-align: center; padding: 20px;'></div>", unsafe_allow_html=True)
-    
     col_cta1, col_cta2, col_cta3 = st.columns([1, 2, 1])
-    
     with col_cta2:
         st.markdown("""
-        <div style="text-align: center;">
-            <p style="color: #94a3b8; font-size: 1.1em; margin-bottom: 15px;">
-                👉 Select a dashboard section from the navigation menu to get started!
-            </p>
-            <p style="color: #38bdf8; font-weight: bold;">
+        <div style="text-align: center; padding: 10px;">
+            <p style="color: #d4d4cc; font-size: 1.1em; margin-bottom: 18px;">
                 Ready to dive into mutual fund intelligence?
             </p>
         </div>
         """, unsafe_allow_html=True)
+        if st.button("🚀  LAUNCH DASHBOARD", use_container_width=True, type="primary", key="cta_launch_bottom"):
+            st.session_state.pending_nav = "🏛 Executive Summary"
+            st.rerun()
 
 # ---------------------------------------------------------------------------
 # Page 1: Executive Summary
@@ -544,7 +699,7 @@ elif "Executive Summary" in page:
             x="month",
             y="total_folios_crore",
             title="Total Industry Folios Over Time (Crore)",
-            color_discrete_sequence=["#38bdf8"]
+            color_discrete_sequence=["#ffd60a"]
         )
         fig_folio.update_layout(template="plotly_dark", plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', height=350)
         st.plotly_chart(fig_folio, use_container_width=True)
@@ -590,7 +745,7 @@ elif "EDA Analysis" in page:
         f"""
         <div class="glass-card" style="margin: 10px 0 20px 0;">
             <div class="card-title">EDA Deliverables</div>
-            <p style="color: #94a3b8; margin: 0;">
+            <p style="color: #c9c9c0; margin: 0;">
                 Notebook: <code>{notebook_path.relative_to(Path(__file__).resolve().parent)}</code><br>
                 PNG exports: <code>{chart_dir.relative_to(Path(__file__).resolve().parent)}</code>
             </p>
@@ -907,6 +1062,12 @@ elif "Risk Analytics" in page:
         (filtered_fund_perf["sharpe_ratio"] >= min_sharpe) &
         (filtered_fund_perf["beta"] <= max_beta)
     ].copy()
+
+    # Merge in VaR/CVaR (computed separately in outputs/var_cvar_report.csv)
+    var_cvar_path = Path(__file__).resolve().parent / "outputs" / "var_cvar_report.csv"
+    if var_cvar_path.exists():
+        var_cvar_df = pd.read_csv(var_cvar_path)[["amfi_code", "var_95_pct", "cvar_95_pct"]]
+        view_df = view_df.merge(var_cvar_df, on="amfi_code", how="left")
     
     if view_df.empty:
         st.warning("No funds found matching your selected risk parameters.")
@@ -997,7 +1158,11 @@ elif "Risk Analytics" in page:
 
         # --- NEW: VaR vs CVaR scatter ---
         st.subheader("⚠️ Value at Risk vs Conditional VaR (95% Confidence)")
-        var_df = view_df.dropna(subset=["var_95_pct", "cvar_95_pct"])
+        if "var_95_pct" not in view_df.columns or "cvar_95_pct" not in view_df.columns:
+            st.info("VaR/CVaR data not available — run `scripts/day6_advanced.py` to generate `outputs/var_cvar_report.csv`.")
+            var_df = pd.DataFrame()
+        else:
+            var_df = view_df.dropna(subset=["var_95_pct", "cvar_95_pct"])
         if not var_df.empty:
             fig_var = px.scatter(
                 var_df,
@@ -1076,7 +1241,7 @@ elif "Recommendation Center" in page:
         for i, (_, row) in enumerate(top_recs.iterrows()):
             st.markdown(f"""
             <div class="rec-card">
-                <h4 style="color: #38bdf8; margin: 0 0 5px 0;">#{i+1}: {row['scheme_name']}</h4>
+                <h4 style="color: #ffd60a; margin: 0 0 5px 0;">#{i+1}: {row['scheme_name']}</h4>
                 <div style="display: flex; gap: 30px; font-size: 15px; flex-wrap: wrap;">
                     <div><strong>Category:</strong> {row['sub_category']}</div>
                     <div><strong>3Y Return (CAGR):</strong> <span style="color: #10b981;">{row['return_3yr_pct']:.2f}%</span></div>
@@ -1379,7 +1544,7 @@ elif "Portfolio & Concentration" in page:
             theta=radar_sectors["sector"].values,
             fill="toself",
             name="Sector Weights",
-            line=dict(color="#38bdf8")
+            line=dict(color="#ffd60a")
         ))
         fig_radar.update_layout(
             polar=dict(radialaxis=dict(visible=True)),
